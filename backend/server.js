@@ -22,18 +22,27 @@ app.use('/api/tasks', taskRoutes);
 
 const PORT = process.env.PORT || 5000;
 
+const { MongoMemoryServer } = require('mongodb-memory-server');
+
 // Database Connection
-mongoose
-  .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/team_task_manager', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
+const connectDB = async () => {
+  try {
+    let uri = process.env.MONGO_URI;
+    if (!uri) {
+      const mongod = await MongoMemoryServer.create();
+      uri = mongod.getUri();
+      console.log('Using in-memory MongoDB');
+    }
+    
+    await mongoose.connect(uri);
     console.log('Connected to MongoDB');
+    
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
-  })
-  .catch((err) => {
+  } catch (err) {
     console.error('Error connecting to MongoDB:', err.message);
-  });
+  }
+};
+
+connectDB();
