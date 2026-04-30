@@ -37,6 +37,7 @@ const connectDB = async () => {
   try {
     let uri = process.env.MONGO_URI;
     if (!uri) {
+      console.log('No MONGO_URI provided. Attempting to start mongodb-memory-server...');
       const mongod = await MongoMemoryServer.create();
       uri = mongod.getUri();
       console.log('Using in-memory MongoDB');
@@ -44,13 +45,13 @@ const connectDB = async () => {
     
     await mongoose.connect(uri);
     console.log('Connected to MongoDB');
-    
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
   } catch (err) {
-    console.error('Error connecting to MongoDB:', err.message);
+    console.error('Error connecting to MongoDB. If deploying to Railway, please add a MONGO_URI environment variable:', err.message);
   }
 };
 
 connectDB();
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
