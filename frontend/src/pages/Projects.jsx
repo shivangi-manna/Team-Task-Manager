@@ -18,7 +18,7 @@ const Projects = ({ user }) => {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/projects', {
+      const res = await axios.get('http://localhost:5001/api/projects', {
         headers: { 'x-auth-token': localStorage.getItem('token') }
       });
       setProjects(res.data);
@@ -31,7 +31,7 @@ const Projects = ({ user }) => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/projects/users', {
+      const res = await axios.get('http://localhost:5001/api/projects/users', {
         headers: { 'x-auth-token': localStorage.getItem('token') }
       });
       setUsers(res.data);
@@ -43,7 +43,7 @@ const Projects = ({ user }) => {
   const handleCreateProject = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/projects', formData, {
+      await axios.post('http://localhost:5001/api/projects', formData, {
         headers: { 'x-auth-token': localStorage.getItem('token') }
       });
       setShowModal(false);

@@ -20,11 +20,11 @@ const ProjectDetails = ({ user }) => {
     try {
       const config = { headers: { 'x-auth-token': localStorage.getItem('token') } };
       
-      const pRes = await axios.get('http://localhost:5000/api/projects', config);
+      const pRes = await axios.get('http://localhost:5001/api/projects', config);
       const currentProject = pRes.data.find(p => p._id === id);
       setProject(currentProject);
 
-      const tRes = await axios.get(`http://localhost:5000/api/tasks/project/${id}`, config);
+      const tRes = await axios.get(`http://localhost:5001/api/tasks/project/${id}`, config);
       setTasks(tRes.data);
       
       setLoading(false);
@@ -37,7 +37,7 @@ const ProjectDetails = ({ user }) => {
   const handleCreateTask = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/tasks', { ...formData, project: id }, {
+      await axios.post('http://localhost:5001/api/tasks', { ...formData, project: id }, {
         headers: { 'x-auth-token': localStorage.getItem('token') }
       });
       setShowModal(false);
@@ -50,7 +50,7 @@ const ProjectDetails = ({ user }) => {
 
   const updateTaskStatus = async (taskId, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/tasks/${taskId}`, { status: newStatus }, {
+      await axios.put(`http://localhost:5001/api/tasks/${taskId}`, { status: newStatus }, {
         headers: { 'x-auth-token': localStorage.getItem('token') }
       });
       fetchProjectAndTasks();

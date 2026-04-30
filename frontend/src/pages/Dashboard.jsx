@@ -16,13 +16,13 @@ const Dashboard = ({ user }) => {
         const config = { headers: { 'x-auth-token': token } };
         
         // Fetch projects
-        const projRes = await axios.get('http://localhost:5000/api/projects', config);
+        const projRes = await axios.get('http://localhost:5001/api/projects', config);
         setProjects(projRes.data);
         
         // Fetch tasks for all projects (simplified for dashboard)
         let allTasks = [];
         for (let p of projRes.data) {
-          const taskRes = await axios.get(`http://localhost:5000/api/tasks/project/${p._id}`, config);
+          const taskRes = await axios.get(`http://localhost:5001/api/tasks/project/${p._id}`, config);
           allTasks = [...allTasks, ...taskRes.data];
         }
         setTasks(allTasks);
