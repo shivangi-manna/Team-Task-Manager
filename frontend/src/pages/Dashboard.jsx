@@ -16,13 +16,13 @@ const Dashboard = ({ user }) => {
         const config = { headers: { 'x-auth-token': token } };
         
         // Fetch projects
-        const projRes = await axios.get('http://localhost:5001/api/projects', config);
+        const projRes = await axios.get('/api/projects', config);
         setProjects(projRes.data);
         
         // Fetch tasks for all projects
         let allTasks = [];
         for (let p of projRes.data) {
-          const taskRes = await axios.get(`http://localhost:5001/api/tasks/project/${p._id}`, config);
+          const taskRes = await axios.get(`/api/tasks/project/${p._id}`, config);
           allTasks = [...allTasks, ...taskRes.data];
         }
         setTasks(allTasks);
@@ -71,7 +71,7 @@ const Dashboard = ({ user }) => {
 
         {/* Top Stat Cards */}
         <div className="grid-3" style={{ marginBottom: '2rem' }}>
-          <div className="glass-card glow-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Link to="/projects" className="glass-card glow-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit' }}>
             <div style={{ padding: '1rem', background: 'rgba(99, 102, 241, 0.2)', borderRadius: '12px', color: 'var(--primary)' }}>
               <Briefcase size={24} />
             </div>
@@ -79,9 +79,9 @@ const Dashboard = ({ user }) => {
               <div style={{ fontSize: '2rem', fontWeight: 700 }}>{projects.length}</div>
               <div style={{ color: 'var(--text-muted)' }}>Active Projects</div>
             </div>
-          </div>
+          </Link>
           
-          <div className="glass-card glow-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Link to="/projects" className="glass-card glow-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit' }}>
             <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', color: 'var(--success)' }}>
               <CheckSquare size={24} />
             </div>
@@ -89,9 +89,9 @@ const Dashboard = ({ user }) => {
               <div style={{ fontSize: '2rem', fontWeight: 700 }}>{doneTasks}</div>
               <div style={{ color: 'var(--text-muted)' }}>Tasks Completed</div>
             </div>
-          </div>
+          </Link>
           
-          <div className="glass-card glow-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Link to="/projects" className="glass-card glow-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit' }}>
             <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.2)', borderRadius: '12px', color: 'var(--warning)' }}>
               <Clock size={24} />
             </div>
@@ -99,7 +99,7 @@ const Dashboard = ({ user }) => {
               <div style={{ fontSize: '2rem', fontWeight: 700 }}>{inProgressTasks}</div>
               <div style={{ color: 'var(--text-muted)' }}>In Progress</div>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Analytics Section */}

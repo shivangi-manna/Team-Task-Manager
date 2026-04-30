@@ -18,7 +18,7 @@ function App() {
       if (token) {
         try {
           // Verify token and get user
-          const res = await axios.get('http://localhost:5001/api/auth', {
+          const res = await axios.get('/api/auth', {
             headers: { 'x-auth-token': token }
           });
           setUser(res.data);
