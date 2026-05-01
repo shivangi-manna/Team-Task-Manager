@@ -8,49 +8,60 @@ A full-stack web application designed for teams to manage projects, assign tasks
 - **Role-Based Access Control (RBAC)**: Differentiates between 'Admin' (can create projects and add members) and 'Member' roles.
 - **Project & Team Management**: Admins can create projects and assign members from the workspace.
 - **Task Tracking**: Create tasks within projects, assign them to members, set due dates, and track statuses (To Do, In Progress, Done).
-- **Dashboard**: A comprehensive overview of personal statistics, including active projects, completed tasks, and a quick glance at assigned tasks.
-- **Premium UI/UX**: Features a modern, vibrant glassmorphism design with smooth animations using React and Framer Motion.
+- **Interactive Dashboard**: A comprehensive overview featuring visual progress bars and dynamic **Recharts** analytics for task distribution.
+- **Premium UI/UX**: Features a modern, vibrant glassmorphism design with smooth hover animations using React and Framer Motion.
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: React.js (Vite), Framer Motion, Lucide React, Custom CSS (Glassmorphism).
+- **Frontend**: React.js (Vite), Framer Motion, Recharts, Lucide React, Custom CSS (Glassmorphism).
 - **Backend**: Node.js, Express.js.
-- **Database**: MongoDB (Mongoose ORM).
+- **Database**: MongoDB (Mongoose ORM). Uses `mongodb-memory-server` for zero-config local development.
 - **Authentication**: JSON Web Tokens (JWT), bcryptjs for password hashing.
 
 ## ⚙️ Running Locally
 
-### Prerequisites
-- Node.js installed
-- MongoDB running locally or a MongoDB Atlas URI
+The project is structured as a **Monorepo**. You can run both the frontend and backend locally with ease.
 
-### 1. Backend Setup
+### Prerequisites
+- Node.js installed (v18+)
+
+### 1. Zero-Config Local Start
+You don't even need a local MongoDB installed! The backend automatically spins up an in-memory database if you don't provide a `MONGO_URI`.
+
+Open two separate terminal windows/tabs:
+
+**Terminal 1 (Backend):**
 ```bash
 cd backend
 npm install
-```
-Create a `.env` file in the `backend` directory with the following variables:
-```
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/team_task_manager
-JWT_SECRET=your_super_secret_key
-```
-Start the backend server:
-```bash
 npm run dev
-# or
-node server.js
 ```
+*The backend will run on `http://localhost:5001`.*
 
-### 2. Frontend Setup
+**Terminal 2 (Frontend):**
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Access the application at `http://localhost:5173`.
+*The frontend will run on `http://localhost:5174` (or 5173).*
 
-## 🌐 Deployment
-This application is ready to be deployed on platforms like **Railway**, Vercel, or Render. 
-- For Railway deployment, you can deploy the `backend` folder as a Node service and the `frontend` as a Static site (or Vercel for React).
-- Make sure to add the necessary Environment Variables on Railway (`MONGO_URI`, `JWT_SECRET`).
+### 2. Environment Variables (Optional)
+If you want to use a real database or custom secret, create a `.env` file in the `backend` directory:
+```
+PORT=5001
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_super_secret_key
+```
+
+## 🌐 Deployment (Railway)
+
+This application is configured for a seamless, one-click deployment on **Railway** as a unified Monorepo.
+
+1. Connect your GitHub repository to a new Railway project.
+2. Railway will automatically detect the root `package.json` and build both the frontend and backend together.
+3. **Required**: Add a MongoDB service in your Railway project.
+4. Go to your application's **Variables** tab in Railway and add:
+   - `MONGO_URI` (reference your Railway MongoDB URL)
+   - `JWT_SECRET` (add a secure random string)
+5. Railway will deploy the application, and the Express backend will automatically serve the built React frontend!
