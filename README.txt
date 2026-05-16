@@ -15,7 +15,7 @@ A full-stack web application designed for teams to manage projects, assign tasks
 
 - **Frontend**: React.js (Vite), Framer Motion, Recharts, Lucide React, Custom CSS (Glassmorphism).
 - **Backend**: Node.js, Express.js.
-- **Database**: MongoDB (Mongoose ORM). Uses `mongodb-memory-server` for zero-config local development.
+- **Database**: MongoDB (Mongoose ORM).
 - **Authentication**: JSON Web Tokens (JWT), bcryptjs for password hashing.
 
 ## ⚙️ Running Locally
@@ -24,9 +24,16 @@ The project is structured as a **Monorepo**. You can run both the frontend and b
 
 ### Prerequisites
 - Node.js installed (v18+)
+- A MongoDB database (local or cloud like MongoDB Atlas)
 
-### 1. Zero-Config Local Start
-You don't even need a local MongoDB installed! The backend automatically spins up an in-memory database if you don't provide a `MONGO_URI`.
+### 1. Setup
+
+Create a `.env` file in the `backend` directory:
+```
+PORT=5001
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_super_secret_key
+```
 
 Open two separate terminal windows/tabs:
 
@@ -46,22 +53,14 @@ npm run dev
 ```
 *The frontend will run on `http://localhost:5174` (or 5173).*
 
-### 2. Environment Variables (Optional)
-If you want to use a real database or custom secret, create a `.env` file in the `backend` directory:
-```
-PORT=5001
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_super_secret_key
-```
-
 ## 🌐 Deployment (Railway)
 
 This application is configured for a seamless, one-click deployment on **Railway** as a unified Monorepo.
 
 1. Connect your GitHub repository to a new Railway project.
-2. Railway will automatically detect the root `package.json` and build both the frontend and backend together.
-3. **Required**: Add a MongoDB service in your Railway project.
+2. Railway will automatically detect the root `package.json` and the `nixpacks.toml` config.
+3. **Required**: Add a MongoDB service in your Railway project (or use MongoDB Atlas).
 4. Go to your application's **Variables** tab in Railway and add:
-   - `MONGO_URI` (reference your Railway MongoDB URL)
+   - `MONGO_URI` (your MongoDB connection string)
    - `JWT_SECRET` (add a secure random string)
-5. Railway will deploy the application, and the Express backend will automatically serve the built React frontend!
+5. Railway will build the frontend and start the Express backend which serves the built React frontend!
