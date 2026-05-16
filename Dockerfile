@@ -17,9 +17,7 @@ COPY . .
 RUN cd frontend && npm run build
 
 # Set environment variables
-ENV PORT=5001
 ENV NODE_ENV=production
-EXPOSE 5001
 
 # Start the application
 CMD ["node", "backend/server.js"]
