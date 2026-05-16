@@ -45,6 +45,13 @@ app.get('*', (req, res) => {
   }
 });
 
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
 const PORT = Number(process.env.PORT) || 5001;
 
 // Database Connection
