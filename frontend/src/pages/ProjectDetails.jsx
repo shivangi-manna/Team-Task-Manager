@@ -2,7 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Plus, Clock, CheckCircle } from 'lucide-react';
+import { Plus, Clock, CheckCircle, Trash2, AlertTriangle } from 'lucide-react';
+
+const priorityColors = {
+  'High': 'var(--danger)',
+  'Medium': 'var(--warning)',
+  'Low': 'var(--success)',
+};
 
 const ProjectDetails = ({ user }) => {
   const { id } = useParams();
@@ -10,7 +16,7 @@ const ProjectDetails = ({ user }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ title: '', description: '', status: 'To Do', assignee: '', dueDate: '' });
+  const [formData, setFormData] = useState({ title: '', description: '', status: 'To Do', priority: 'Medium', assignee: '', dueDate: '' });
 
   useEffect(() => {
     fetchProjectAndTasks();
@@ -41,7 +47,7 @@ const ProjectDetails = ({ user }) => {
         headers: { 'x-auth-token': localStorage.getItem('token') }
       });
       setShowModal(false);
-      setFormData({ title: '', description: '', status: 'To Do', assignee: '', dueDate: '' });
+      setFormData({ title: '', description: '', status: 'To Do', priority: 'Medium', assignee: '', dueDate: '' });
       fetchProjectAndTasks();
     } catch (err) {
       console.error(err);
@@ -59,14 +65,27 @@ const ProjectDetails = ({ user }) => {
     }
   };
 
+  const deleteTask = async (taskId) => {
+    if (!window.confirm('Are you sure you want to delete this task?')) return;
+    try {
+      await axios.delete(`/api/tasks/${taskId}`, {
+        headers: { 'x-auth-token': localStorage.getItem('token') }
+      });
+      fetchProjectAndTasks();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   if (loading) return <div className="flex-center" style={{height: '60vh'}}>Loading...</div>;
   if (!project) return <div className="flex-center" style={{height: '60vh'}}>Project not found</div>;
 
   const columns = ['To Do', 'In Progress', 'Done'];
+  const isOverdue = (task) => task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'Done';
 
   return (
     <div className="container" style={{ maxWidth: '1400px' }}>
-      <div className="flex-between" style={{ marginBottom: '2rem' }}>
+      <div className="flex-between" style={{ marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{project.name}</h1>
           <p style={{ color: 'var(--text-muted)' }}>{project.description}</p>
@@ -77,7 +96,7 @@ const ProjectDetails = ({ user }) => {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-        {columns.map((col, idx) => (
+        {columns.map((col) => (
           <div key={col} className="glass-panel" style={{ padding: '1.5rem', minHeight: '60vh', background: 'rgba(15,23,42,0.4)' }}>
             <h3 style={{ marginBottom: '1.5rem', paddingBottom: '0.5rem', borderBottom: '2px solid var(--primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               {col}
@@ -94,12 +113,31 @@ const ProjectDetails = ({ user }) => {
                   transition={{ delay: i * 0.1 }}
                   key={task._id} 
                   className="glass-card" 
-                  style={{ padding: '1.25rem' }}
+                  style={{ padding: '1.25rem', borderLeft: `3px solid ${priorityColors[task.priority] || 'var(--primary)'}` }}
                 >
-                  <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>{task.title}</h4>
-                  <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{task.description}</p>
+                  <div className="flex-between" style={{ marginBottom: '0.5rem' }}>
+                    <h4 style={{ fontSize: '1.05rem' }}>{task.title}</h4>
+                    {user.role === 'Admin' && (
+                      <button onClick={() => deleteTask(task._id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}>
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>{task.description}</p>
                   
-                  <div className="flex-between" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  {/* Priority & Assignee */}
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                    <span className="badge" style={{ background: `${priorityColors[task.priority]}20`, color: priorityColors[task.priority], fontSize: '0.75rem' }}>
+                      {task.priority}
+                    </span>
+                    {isOverdue(task) && (
+                      <span className="badge" style={{ background: 'rgba(239,68,68,0.2)', color: 'var(--danger)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <AlertTriangle size={12} /> Overdue
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex-between" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                     {task.assignee ? (
                       <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                         <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem' }}>
@@ -110,16 +148,16 @@ const ProjectDetails = ({ user }) => {
                     ) : <span>Unassigned</span>}
                     
                     {task.dueDate && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <Clock size={14} /> {new Date(task.dueDate).toLocaleDateString()}
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: isOverdue(task) ? 'var(--danger)' : 'var(--text-muted)' }}>
+                        <Clock size={13} /> {new Date(task.dueDate).toLocaleDateString()}
                       </span>
                     )}
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                    {col !== 'To Do' && <button onClick={() => updateTaskStatus(task._id, 'To Do')} className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '0.8rem', flex: 1 }}>To Do</button>}
-                    {col !== 'In Progress' && <button onClick={() => updateTaskStatus(task._id, 'In Progress')} className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '0.8rem', flex: 1 }}>Start</button>}
-                    {col !== 'Done' && <button onClick={() => updateTaskStatus(task._id, 'Done')} className="btn btn-primary" style={{ padding: '4px 8px', fontSize: '0.8rem', flex: 1 }}><CheckCircle size={14}/> Done</button>}
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                    {col !== 'To Do' && <button onClick={() => updateTaskStatus(task._id, 'To Do')} className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '0.75rem', flex: 1 }}>To Do</button>}
+                    {col !== 'In Progress' && <button onClick={() => updateTaskStatus(task._id, 'In Progress')} className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '0.75rem', flex: 1 }}>Start</button>}
+                    {col !== 'Done' && <button onClick={() => updateTaskStatus(task._id, 'Done')} className="btn btn-primary" style={{ padding: '4px 8px', fontSize: '0.75rem', flex: 1 }}><CheckCircle size={13}/> Done</button>}
                   </div>
                 </motion.div>
               ))}
@@ -138,12 +176,26 @@ const ProjectDetails = ({ user }) => {
             <h2 style={{ marginBottom: '1.5rem' }}>Add New Task</h2>
             <form onSubmit={handleCreateTask} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Task Title</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Task Title *</label>
                 <input type="text" className="input-field" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem' }}>Description</label>
                 <textarea className="input-field" rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}></textarea>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem' }}>Priority</label>
+                  <select className="input-field" value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value})}>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem' }}>Due Date</label>
+                  <input type="date" className="input-field" value={formData.dueDate} onChange={e => setFormData({...formData, dueDate: e.target.value})} />
+                </div>
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem' }}>Assignee</label>
@@ -152,12 +204,10 @@ const ProjectDetails = ({ user }) => {
                   {project.members.map(m => (
                     <option key={m._id} value={m._id}>{m.username}</option>
                   ))}
-                  {project.owner && <option value={project.owner._id}>{project.owner.username} (Owner)</option>}
+                  {project.owner && !project.members.find(m => m._id === project.owner._id) && (
+                    <option value={project.owner._id}>{project.owner.username} (Owner)</option>
+                  )}
                 </select>
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Due Date</label>
-                <input type="date" className="input-field" value={formData.dueDate} onChange={e => setFormData({...formData, dueDate: e.target.value})} />
               </div>
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Add Task</button>

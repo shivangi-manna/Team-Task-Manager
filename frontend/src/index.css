@@ -153,7 +153,12 @@ a {
 
 .badge-todo { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
 .badge-progress { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+.badge-inprogress { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
 .badge-done { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+
+.badge-priority-high { background: rgba(239, 68, 68, 0.2); color: var(--danger); font-size: 0.75rem; }
+.badge-priority-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); font-size: 0.75rem; }
+.badge-priority-low { background: rgba(16, 185, 129, 0.2); color: var(--success); font-size: 0.75rem; }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {

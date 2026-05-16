@@ -13,7 +13,7 @@ router.get('/', auth, async (req, res) => {
     res.json(projects);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).json({ msg: 'Server Error' });
   }
 });
 
@@ -21,7 +21,11 @@ router.get('/', auth, async (req, res) => {
 router.post('/', auth, async (req, res) => {
   try {
     const { name, description, members } = req.body;
-    
+
+    if (!name) {
+      return res.status(400).json({ msg: 'Project name is required' });
+    }
+
     // Add owner to members if not already
     let projectMembers = members || [];
     if (!projectMembers.includes(req.user.id)) {
@@ -36,10 +40,63 @@ router.post('/', auth, async (req, res) => {
     });
 
     const project = await newProject.save();
-    res.json(project);
+    const populated = await Project.findById(project._id)
+      .populate('owner', 'username email')
+      .populate('members', 'username email');
+    res.json(populated);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).json({ msg: 'Server Error' });
+  }
+});
+
+// Add member to project (Admin only)
+router.put('/:id/members', auth, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ msg: 'Project not found' });
+
+    // Only owner (admin) can add members
+    if (project.owner.toString() !== req.user.id) {
+      return res.status(403).json({ msg: 'Not authorized. Only project admin can add members.' });
+    }
+
+    const { userId } = req.body;
+    if (!project.members.includes(userId)) {
+      project.members.push(userId);
+      await project.save();
+    }
+
+    const populated = await Project.findById(project._id)
+      .populate('owner', 'username email')
+      .populate('members', 'username email');
+    res.json(populated);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+});
+
+// Remove member from project (Admin only)
+router.delete('/:id/members/:userId', auth, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ msg: 'Project not found' });
+
+    if (project.owner.toString() !== req.user.id) {
+      return res.status(403).json({ msg: 'Not authorized. Only project admin can remove members.' });
+    }
+
+    project.members = project.members.filter(m => m.toString() !== req.params.userId);
+    await project.save();
+
+    const populated = await Project.findById(project._id)
+      .populate('owner', 'username email')
+      .populate('members', 'username email');
+    res.json(populated);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Server Error' });
   }
 });
 
@@ -49,7 +106,7 @@ router.get('/users', auth, async (req, res) => {
     const users = await User.find().select('-password');
     res.json(users);
   } catch (err) {
-    res.status(500).send('Server Error');
+    res.status(500).json({ msg: 'Server Error' });
   }
 });
 
