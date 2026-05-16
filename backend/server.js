@@ -42,7 +42,7 @@ app.get('*', (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5001;
+const PORT = Number(process.env.PORT) || 5001;
 
 // Database Connection
 const connectDB = async () => {
@@ -60,7 +60,8 @@ const connectDB = async () => {
 };
 
 // Start server immediately so Railway healthchecks pass
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  const address = server.address();
+  console.log(`Server running on port ${address.port} (host: ${address.address})`);
   connectDB();
 });
