@@ -6,6 +6,6 @@
   },
   "scripts": {
     "build": "cd backend && npm install --omit=dev && cd ../frontend && npm install && npm run build",
-    "start": "cd backend && node server.js"
+    "start": "node backend/server.js"
   }
 }
