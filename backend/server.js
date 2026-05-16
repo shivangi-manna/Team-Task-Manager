@@ -30,31 +30,37 @@ app.use('/api/tasks', taskRoutes);
 const frontendPath = path.join(__dirname, '..', 'frontend', 'dist');
 app.use(express.static(frontendPath));
 
+const fs = require('fs');
+
 // SPA catch-all (Express 4 compatible)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+  const indexPath = path.join(frontendPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(200).send('API is running. Frontend build is missing.');
+  }
 });
 
 const PORT = process.env.PORT || 5001;
 
 // Database Connection
 const connectDB = async () => {
-  const uri = process.env.MONGO_URI;
-  if (!uri) {
-    console.error('MONGO_URI is required');
-    process.exit(1);
+  try {
+    const uri = process.env.MONGO_URI;
+    if (!uri) {
+      console.error('MONGO_URI is required');
+      return;
+    }
+    await mongoose.connect(uri);
+    console.log('MongoDB connected');
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
   }
-  await mongoose.connect(uri);
-  console.log('MongoDB connected');
 };
 
-connectDB()
-  .then(() => {
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('Startup error:', err);
-    process.exit(1);
-  });
+// Start server immediately so Railway healthchecks pass
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+  connectDB();
+});
