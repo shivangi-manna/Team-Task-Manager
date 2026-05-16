@@ -5,7 +5,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "install:all": "cd backend && npm install --production && cd ../frontend && npm install",
+    "postinstall": "cd backend && npm install --omit=dev && cd ../frontend && npm install",
     "build": "cd frontend && npm run build",
     "start": "cd backend && node server.js"
   }
