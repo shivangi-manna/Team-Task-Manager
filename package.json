@@ -5,7 +5,7 @@
     "node": ">=20.19.0"
   },
   "scripts": {
-    "build": "cd backend && npm install --omit=dev && cd ../frontend && npm install && npm run build",
-    "start": "node backend/server.js"
+    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install",
+    "start": "cd backend && npm start"
   }
 }
